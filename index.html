@@ -3,103 +3,251 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>KontenjanAlarm</title>
-  <meta name="description" content="Dolu şubeyi takip et, yer açıldığı an haber al. OBS'yi yenilemeye son.">
+  <title>YaşarOBS</title>
+  <meta name="description" content="YaşarOBS: ders projesi için demo öğrenci bilgi sistemi. Ders kaydında KontenjanAlarm Sistemi ile dolu şubede yer açılınca anında haber alın.">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="topbar">
-    <div class="container topbar-inner">
-      <a class="logo" href="#">
-        <span class="logo-icon" aria-hidden="true">🔔</span>
-        <span>Kontenjan<b>Alarm</b></span>
-      </a>
-      <button type="button" class="btn btn-light" id="notify-btn">🔔 Bildirimlere izin ver</button>
-    </div>
-  </header>
 
-  <main class="container">
-    <!-- Hero -->
-    <section class="hero">
-      <div class="hero-text">
-        <span class="hero-kicker">Ders kaydı dönemi için</span>
-        <h1>OBS'yi yenilemeyi bırak. Yer açılınca biz haber verelim.</h1>
-        <p>
-          Dolu bir şubede yer kapmak için sayfayı dakikalarca yenilemene gerek yok: şubeyi takip et,
-          kontenjan açıldığı an sesli ve anlık bildirim al — ya da bekleme listesine gir, sıran gelince yer otomatik olarak senin olsun.
-        </p>
-        <ul class="hero-chips">
-          <li>🔔 Anlık alarm</li>
-          <li>🔀 Alternatif şubeler</li>
-          <li>⏳ Adil bekleme listesi</li>
-        </ul>
-      </div>
-      <div class="hero-visual" aria-hidden="true">
-        <div class="mock-card mock-back">
-          <span class="mock-pill">Dolu</span>
-          <strong>MAT 201 · Şube 1</strong>
-          <span>60/60 — Sıradaki 3. kişisiniz</span>
-        </div>
-        <div class="mock-card mock-front">
-          <span class="mock-emoji">🎉</span>
-          <div>
-            <strong>Yer açıldı!</strong>
-            <span>ENE 301 Şube 3'te 1 boş yer var</span>
-          </div>
-          <span class="mock-btn">Kaydol</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Simulation panel -->
-    <section class="card sim-panel" aria-labelledby="sim-title">
-      <div class="sim-head">
+  <!-- ===== Giriş ===== -->
+  <div class="login" id="login-view" hidden>
+    <div class="login-card">
+      <span class="demo-ribbon" aria-hidden="true">DEMO</span>
+      <div class="login-brand">
+        <span class="emblem emblem-lg" aria-hidden="true">🎓</span>
         <div>
-          <h2 id="sim-title">Simülasyon paneli <span class="tag">Demo</span></h2>
-          <p class="muted">Gerçek OBS yerine sahte veriler: simülasyon birkaç saniyede bir rastgele yer açar veya doldurur. Her şubedeki <b>“Yer aç”</b> butonu ile istediğiniz an yer açabilirsiniz.</p>
-        </div>
-        <div class="sim-controls">
-          <span class="status-pill" id="sim-status">Durdu</span>
-          <button type="button" class="btn btn-primary" id="sim-btn">▶ Simülasyonu başlat</button>
-          <button type="button" class="btn btn-ghost" id="reset-btn">↺ Verileri sıfırla</button>
+          <div class="brand-name">Yaşar<b>OBS</b></div>
+          <div class="login-sub">Yaşar Üniversitesi – Öğrenci Bilgi Sistemi</div>
         </div>
       </div>
-      <ul class="sim-log" id="sim-log" aria-live="polite"></ul>
-    </section>
 
-    <div class="layout">
-      <!-- Courses -->
-      <section class="courses" aria-labelledby="courses-title">
-        <div class="section-head">
-          <h2 id="courses-title">Dersler</h2>
-          <input type="search" id="search" class="search" placeholder="Ders ara… (ör. ENE, Fizik)" aria-label="Ders ara">
+      <p class="demo-note" role="note">⚠️ <b>Demo – gerçek şifre girmeyin.</b> Alanlar örnek bilgilerle doldurulmuştur ve değiştirilemez; hiçbir bilgi bir yere gönderilmez.</p>
+
+      <form id="login-form" autocomplete="off" novalidate>
+        <label for="login-no">Öğrenci numarası</label>
+        <input id="login-no" class="input" type="text" value="22050111001" readonly>
+
+        <label for="login-pass">Şifre</label>
+        <input id="login-pass" class="input" type="password" value="demo1234" readonly>
+
+        <label for="captcha-answer">Güvenlik sorusu</label>
+        <div class="captcha">
+          <span class="captcha-q" id="captcha-q" aria-live="polite"></span>
+          <button type="button" class="btn btn-ghost btn-icon" id="captcha-refresh" aria-label="Yeni soru" title="Yeni soru">↻</button>
+          <input id="captcha-answer" class="input captcha-input" type="text" inputmode="numeric" placeholder="Sonuç" autocomplete="off">
         </div>
-        <div id="course-list" class="course-list"></div>
-      </section>
+        <p class="form-error" id="captcha-error" role="alert" hidden></p>
 
-      <!-- Sidebar -->
-      <aside class="sidebar">
-        <section class="card" aria-labelledby="follow-title">
-          <h2 id="follow-title">Takip listem <span class="count-badge" id="follow-count">0</span></h2>
-          <p class="muted small">Takip ettiğiniz dolu bir şubede yer açılınca ekranda uyarı, sesli bip ve tarayıcı bildirimi alırsınız.</p>
-          <ul id="follow-list" class="follow-list"></ul>
-        </section>
-
-        <section class="card info-box" aria-labelledby="fair-title">
-          <h2 id="fair-title">⚖️ Neden bekleme listesi daha adil?</h2>
-          <ul>
-            <li><b>Yenile-kazan</b> sistemi hızlı internete sahip ve gün boyu ekran başında olabilen öğrenciye avantaj sağlar.</li>
-            <li>Bekleme listesinde açılan yer <b>otomatik olarak ilk sıradakine</b> verilir. Kimse sayfayı yenilemek zorunda kalmaz.</li>
-            <li>Herkes sırasını görür ve sunucu binlerce gereksiz yenilemeyle yorulmaz. <b>Şans değil, sıra kazanır.</b></li>
-          </ul>
-        </section>
-      </aside>
+        <button type="submit" class="btn btn-primary btn-lg btn-block">Giriş yap</button>
+        <a href="#" class="forgot" id="forgot-link">Şifremi unuttum</a>
+      </form>
     </div>
-  </main>
+    <footer class="footer">Ders projesi prototipi – Yaşar Üniversitesi'nin resmi sistemi değildir.</footer>
+  </div>
 
-  <footer class="footer container">
-    KontenjanAlarm bir prototiptir ve gerçek OBS'ye bağlı değildir. Takip listeniz bu tarayıcıda saklanır.
-  </footer>
+  <!-- ===== Uygulama ===== -->
+  <div class="app" id="app" hidden>
+    <aside class="sidebar" id="sidebar" aria-label="Ana menü">
+      <div class="sidebar-brand">
+        <span class="emblem" aria-hidden="true">🎓</span>
+        <div>
+          <div class="brand-name">Yaşar<b>OBS</b></div>
+          <div class="sidebar-sub">Öğrenci Bilgi Sistemi</div>
+        </div>
+      </div>
+
+      <input type="search" class="menu-search" id="menu-search" placeholder="Menüde ara…" aria-label="Menüde ara">
+
+      <nav class="nav" id="nav">
+        <div class="nav-group">
+          <div class="nav-title">Genel</div>
+          <a href="#/ana-sayfa" data-nav="ana-sayfa"><span aria-hidden="true">🏠</span> Ana Sayfa</a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-title">Dersler ve Dönem İşlemleri</div>
+          <a href="#/ders-kayit" data-nav="ders-kayit"><span aria-hidden="true">📝</span> Ders Kayıt <span class="nav-badge" id="nav-badge" hidden></span></a>
+          <a href="#/notlar" data-nav="notlar"><span aria-hidden="true">📊</span> Notlar</a>
+          <a href="#/ders-programi" data-nav="ders-programi"><span aria-hidden="true">🗓️</span> Ders Programı</a>
+          <a href="#/transkript" data-nav="transkript"><span aria-hidden="true">📄</span> Transkript</a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-title">Formlar</div>
+          <a href="#/formlar" data-nav="formlar"><span aria-hidden="true">🗂️</span> Formlar</a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-title">Belge Talepleri</div>
+          <a href="#/belge-talepleri" data-nav="belge-talepleri"><span aria-hidden="true">📨</span> Belge Talepleri</a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-title">Akademik</div>
+          <a href="#/kredi-transferi" data-nav="kredi-transferi"><span aria-hidden="true">🔁</span> Kredi Transferi</a>
+          <a href="#/hazirlik-okulu" data-nav="hazirlik-okulu"><span aria-hidden="true">🗣️</span> Hazırlık Okulu</a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-title">Başvurular</div>
+          <a href="#/basvurular" data-nav="basvurular"><span aria-hidden="true">📥</span> Başvurular</a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-title">Hesap</div>
+          <a href="#/kullanici-ayarlari" data-nav="kullanici-ayarlari"><span aria-hidden="true">⚙️</span> Kullanıcı Ayarları</a>
+        </div>
+        <p class="nav-empty" id="nav-empty" hidden>Sonuç yok.</p>
+      </nav>
+    </aside>
+    <div class="drawer-backdrop" id="drawer-backdrop" hidden></div>
+
+    <div class="app-main">
+      <header class="topbar">
+        <button type="button" class="menu-btn" id="menu-btn" aria-label="Menüyü aç" aria-controls="sidebar" aria-expanded="false">☰</button>
+        <span class="uni-name">Yaşar Üniversitesi</span>
+        <span class="term-badge">2026-2027 Güz</span>
+        <span class="spacer"></span>
+        <div class="lang" role="group" aria-label="Dil">
+          <button type="button" data-lang="tr" aria-pressed="true">TR</button>
+          <button type="button" data-lang="en" aria-pressed="false">EN</button>
+        </div>
+        <button type="button" class="bell" id="bell-btn" aria-label="KontenjanAlarm bildirimleri">
+          🔔 <span class="bell-count" id="bell-count">0</span>
+        </button>
+        <div class="user-chip">
+          <span class="avatar" aria-hidden="true">DÖ</span>
+          <span class="user-text"><span class="user-no">22050111001</span><strong>Demo Öğrenci</strong></span>
+        </div>
+        <button type="button" class="btn btn-ghost btn-sm logout-btn" id="logout-btn">Çıkış</button>
+      </header>
+
+      <main class="content">
+        <div class="page-header">
+          <div class="breadcrumb" id="breadcrumb"></div>
+          <h1 class="page-title" id="page-title">Ders Kayıt</h1>
+        </div>
+
+        <!-- ===== Ana Sayfa ===== -->
+        <section data-view="ana-sayfa" hidden>
+          <div class="notice">
+            <span>📢 <b>2026-2027 Güz dönemi ders kayıtları açıktır.</b></span>
+            <a href="#/ders-kayit">Ders Kayıt'a git →</a>
+          </div>
+          <div class="info-grid" id="info-grid"></div>
+        </section>
+
+        <!-- ===== Ders Kayıt ===== -->
+        <section data-view="ders-kayit" hidden>
+          <div class="page-head">
+            <p class="muted small">Enerji Sistemleri Mühendisliği · 2026-2027 Güz · <span class="tag">Örnek veri</span></p>
+            <span class="status-chip js-status"></span>
+          </div>
+
+          <!-- STAR: KontenjanAlarm Sistemi -->
+          <section class="alarm-panel" id="alarm-panel" aria-labelledby="alarm-title">
+            <div class="alarm-inner">
+              <div class="alarm-head">
+                <div>
+                  <h2 id="alarm-title">🔔 KontenjanAlarm Sistemi <span class="new-badge">Yeni</span> <span class="live">Canlı</span></h2>
+                  <p>Dolu şubeyi takip edin, yer açıldığı an <b>ses + ekran uyarısı + bildirim</b> alın ve tek tıkla sepete ekleyin. Sayfayı yenilemenize gerek yok.</p>
+                  <button type="button" class="btn btn-light btn-sm notify-btn" id="notify-btn">Bildirimlere izin ver</button>
+                </div>
+                <div class="alarm-stats" id="alarm-stats"></div>
+              </div>
+              <ul class="alarm-list" id="alarm-list" aria-live="polite"></ul>
+              <details class="fair-note">
+                <summary>⚖️ Neden bekleme listesi daha adil?</summary>
+                <ul>
+                  <li><b>Yenile-kazan</b> sistemi hızlı internete sahip ve gün boyu ekran başında olabilen öğrenciye avantaj sağlar.</li>
+                  <li>Bekleme listesinde açılan yer <b>otomatik olarak sıradaki kişiye</b> verilir, en hızlı yenileyene değil.</li>
+                  <li>Herkes sırasını görür ve sunucu binlerce gereksiz yenilemeyle yorulmaz. <b>Şans değil, sıra kazanır.</b></li>
+                </ul>
+              </details>
+            </div>
+          </section>
+
+          <!-- Demo simulation (small) -->
+          <details class="sim-panel" id="sim-panel">
+            <summary>
+              <span>🧪 Demo: yer aç / simülasyonu başlat</span>
+              <span class="status-pill" id="sim-status">Durdu</span>
+            </summary>
+            <div class="sim-body">
+              <p class="muted small">Sahte veriler: simülasyon 3 saniyede bir rastgele yer açar veya doldurur. Her şubedeki <b>“+ Yer aç”</b> butonu ile istediğiniz an yer açabilirsiniz.</p>
+              <div class="sim-controls">
+                <button type="button" class="btn btn-primary btn-sm" id="sim-btn">▶ Simülasyonu başlat</button>
+                <button type="button" class="btn btn-ghost btn-sm" id="reset-btn">↺ Verileri sıfırla</button>
+              </div>
+              <ul class="sim-log" id="sim-log" aria-live="polite"></ul>
+            </div>
+          </details>
+
+          <!-- Course sections -->
+          <section class="courses" aria-labelledby="courses-title">
+            <div class="section-head">
+              <h2 id="courses-title">Açılan dersler ve şubeler</h2>
+              <input type="search" id="search" class="input search" placeholder="Ders ara… (ör. ESE 3011, Güneş)" aria-label="Ders ara">
+            </div>
+            <div class="filters" role="group" aria-label="Filtre">
+              <button type="button" class="chip" data-filter="all" aria-pressed="true">Tümü</button>
+              <button type="button" class="chip" data-filter="full" aria-pressed="false">Dolu şubeler</button>
+              <button type="button" class="chip" data-filter="follow" aria-pressed="false">Takip ettiklerim</button>
+            </div>
+            <div id="course-list" class="course-list"></div>
+          </section>
+
+          <!-- Secondary helpers -->
+          <div class="helpers">
+            <section class="card helper" aria-labelledby="basket-title">
+              <h2 id="basket-title">🧺 Sepetim</h2>
+              <ul class="basket-list" id="basket-list"></ul>
+              <div class="ects" id="ects-meter"></div>
+              <ul class="warnings" id="basket-warnings"></ul>
+              <button type="button" class="btn btn-primary btn-block" id="submit-btn">Danışman onayına gönder</button>
+              <p class="submit-status"><span class="status-chip js-status"></span></p>
+            </section>
+
+            <section class="card helper" aria-labelledby="tt-title">
+              <h2 id="tt-title">🗓️ Haftalık ders programı</h2>
+              <p class="muted small">Sepetinizdeki dersler. Çakışan saatler kırmızı çizgili gösterilir.</p>
+              <div class="tt-scroll">
+                <div class="timetable" id="timetable"></div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <!-- ===== Ders Programı ===== -->
+        <section data-view="ders-programi" hidden>
+          <div class="card">
+            <div class="page-head">
+              <p class="muted small">2026-2027 Güz · ders sepetinize göre haftalık program</p>
+              <span class="status-chip js-status"></span>
+            </div>
+            <div class="tt-scroll">
+              <div class="timetable timetable-lg" id="timetable-page"></div>
+            </div>
+          </div>
+          <div class="card program-list-card">
+            <h2>Dersler</h2>
+            <div class="table-wrap">
+              <table class="program-table">
+                <thead><tr><th scope="col">Kod</th><th scope="col">Ders</th><th scope="col">Şube</th><th scope="col">Öğretim elemanı</th><th scope="col">Gün / saat</th><th scope="col">AKTS</th></tr></thead>
+                <tbody id="program-rows"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== Placeholder pages ===== -->
+        <section data-view="placeholder" hidden>
+          <div class="card placeholder">
+            <span class="placeholder-icon" aria-hidden="true">🚧</span>
+            <h2 id="placeholder-title"></h2>
+            <p class="muted">Bu sayfa demoda gösterilmemektedir.</p>
+            <a class="btn btn-primary" href="#/ders-kayit">Ders Kayıt'a dön</a>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">Ders projesi prototipi – Yaşar Üniversitesi'nin resmi sistemi değildir.</footer>
+    </div>
+  </div>
 
   <!-- Alert modal -->
   <div class="modal-backdrop" id="modal" hidden>
