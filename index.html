@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KontenjanAlarm</title>
+  <meta name="description" content="Dolu şubeyi takip et, yer açıldığı an haber al. OBS'yi yenilemeye son.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a class="logo" href="#">
+        <span class="logo-icon" aria-hidden="true">🔔</span>
+        <span>Kontenjan<b>Alarm</b></span>
+      </a>
+      <button type="button" class="btn btn-light" id="notify-btn">🔔 Bildirimlere izin ver</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-text">
+        <span class="hero-kicker">Ders kaydı dönemi için</span>
+        <h1>OBS'yi yenilemeyi bırak. Yer açılınca biz haber verelim.</h1>
+        <p>
+          Dolu bir şubede yer kapmak için sayfayı dakikalarca yenilemene gerek yok: şubeyi takip et,
+          kontenjan açıldığı an sesli ve anlık bildirim al — ya da bekleme listesine gir, sıran gelince yer otomatik olarak senin olsun.
+        </p>
+        <ul class="hero-chips">
+          <li>🔔 Anlık alarm</li>
+          <li>🔀 Alternatif şubeler</li>
+          <li>⏳ Adil bekleme listesi</li>
+        </ul>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="mock-card mock-back">
+          <span class="mock-pill">Dolu</span>
+          <strong>MAT 201 · Şube 1</strong>
+          <span>60/60 — Sıradaki 3. kişisiniz</span>
+        </div>
+        <div class="mock-card mock-front">
+          <span class="mock-emoji">🎉</span>
+          <div>
+            <strong>Yer açıldı!</strong>
+            <span>ENE 301 Şube 3'te 1 boş yer var</span>
+          </div>
+          <span class="mock-btn">Kaydol</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Simulation panel -->
+    <section class="card sim-panel" aria-labelledby="sim-title">
+      <div class="sim-head">
+        <div>
+          <h2 id="sim-title">Simülasyon paneli <span class="tag">Demo</span></h2>
+          <p class="muted">Gerçek OBS yerine sahte veriler: simülasyon birkaç saniyede bir rastgele yer açar veya doldurur. Her şubedeki <b>“Yer aç”</b> butonu ile istediğiniz an yer açabilirsiniz.</p>
+        </div>
+        <div class="sim-controls">
+          <span class="status-pill" id="sim-status">Durdu</span>
+          <button type="button" class="btn btn-primary" id="sim-btn">▶ Simülasyonu başlat</button>
+          <button type="button" class="btn btn-ghost" id="reset-btn">↺ Verileri sıfırla</button>
+        </div>
+      </div>
+      <ul class="sim-log" id="sim-log" aria-live="polite"></ul>
+    </section>
+
+    <div class="layout">
+      <!-- Courses -->
+      <section class="courses" aria-labelledby="courses-title">
+        <div class="section-head">
+          <h2 id="courses-title">Dersler</h2>
+          <input type="search" id="search" class="search" placeholder="Ders ara… (ör. ENE, Fizik)" aria-label="Ders ara">
+        </div>
+        <div id="course-list" class="course-list"></div>
+      </section>
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <section class="card" aria-labelledby="follow-title">
+          <h2 id="follow-title">Takip listem <span class="count-badge" id="follow-count">0</span></h2>
+          <p class="muted small">Takip ettiğiniz dolu bir şubede yer açılınca ekranda uyarı, sesli bip ve tarayıcı bildirimi alırsınız.</p>
+          <ul id="follow-list" class="follow-list"></ul>
+        </section>
+
+        <section class="card info-box" aria-labelledby="fair-title">
+          <h2 id="fair-title">⚖️ Neden bekleme listesi daha adil?</h2>
+          <ul>
+            <li><b>Yenile-kazan</b> sistemi hızlı internete sahip ve gün boyu ekran başında olabilen öğrenciye avantaj sağlar.</li>
+            <li>Bekleme listesinde açılan yer <b>otomatik olarak ilk sıradakine</b> verilir. Kimse sayfayı yenilemek zorunda kalmaz.</li>
+            <li>Herkes sırasını görür ve sunucu binlerce gereksiz yenilemeyle yorulmaz. <b>Şans değil, sıra kazanır.</b></li>
+          </ul>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="footer container">
+    KontenjanAlarm bir prototiptir ve gerçek OBS'ye bağlı değildir. Takip listeniz bu tarayıcıda saklanır.
+  </footer>
+
+  <!-- Alert modal -->
+  <div class="modal-backdrop" id="modal" hidden>
+    <div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-text">
+      <div class="modal-icon" id="modal-icon" aria-hidden="true"></div>
+      <h2 id="modal-title"></h2>
+      <p id="modal-text"></p>
+      <div id="modal-extra"></div>
+      <div class="modal-actions" id="modal-actions"></div>
+    </div>
+  </div>
+
+  <div class="toasts" id="toasts"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
